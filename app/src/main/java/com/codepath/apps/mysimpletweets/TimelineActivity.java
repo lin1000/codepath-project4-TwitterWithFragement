@@ -7,11 +7,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 
-import com.codepath.apps.mysimpletweets.adapters.TweetsArrayAdapter;
 import com.codepath.apps.mysimpletweets.fragments.ComposeDialogueFragment;
-import com.codepath.apps.mysimpletweets.listeners.AbstractEndlessScrollListener;
+import com.codepath.apps.mysimpletweets.fragments.TweetsListFragment;
 import com.codepath.apps.mysimpletweets.models.Tweet;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -27,9 +25,9 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
 
     private Toolbar tlToolbar;
     private TwitterClient client;
-    private ArrayList<Tweet> tweets;
-    private TweetsArrayAdapter tweetsAdapter;
-    ListView lvTweets;
+
+    private TweetsListFragment tweetsListFragment;
+
     private static long oldestTweetId=1;
     private static int perRequestTweetCount = 20;
 
@@ -46,33 +44,13 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
         //Toolbar
         tlToolbar = (Toolbar) findViewById(R.id.toolbar) ;
         setSupportActionBar(tlToolbar);
-        //getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setLogo(R.drawable.twitter);
         getSupportActionBar().setDisplayUseLogoEnabled (true);
 
-
-        lvTweets = (ListView) findViewById(R.id.tweetListView);
-
-        tweets = new ArrayList<>();
-        tweetsAdapter = new TweetsArrayAdapter(this,tweets);
-        lvTweets.setAdapter(tweetsAdapter);
-
-        // Attach the listener to the AdapterView onCreate
-        lvTweets.setOnScrollListener(new AbstractEndlessScrollListener() {
-            @Override
-            public boolean onLoadMore(int page, int totalItemsCount) {
-                // Triggered only when new data needs to be appended to the list
-                // Add whatever code is needed to append new items to your AdapterView
-                loadNextDataFromApi(page);
-                Log.d("DEBUG","onLoadMore:page"+ page);
-                Log.d("DEBUG","onLoadMore:totalItemsCount"+ totalItemsCount);
-                // or loadNextDataFromApi(totalItemsCount);
-                return true; // ONLY if more data is actually being loaded; false otherwise.
-            }
-        });
+        //Get tweetsListFragment
+        tweetsListFragment = (TweetsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_timeline);
 
         client = TwitterApplication.getRestClient(); //singleton client
-
         populateTimeline(perRequestTweetCount,1L,1L);
     }
 
@@ -134,7 +112,7 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
                     TimelineActivity.oldestTweetId = oldestTweet.getUid();
                     Log.d("DEBUG","oldestTweetId="+ oldestTweetId);
                 }
-                tweetsAdapter.addAll(tweets);
+                tweetsListFragment.addAll(tweets);
             }
 
             //failure
@@ -181,13 +159,11 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
                 Log.d("DEBUG",errorResponse.toString());
             }
         });
-
-
     }
 
     @Override
     public void onFinishCompose() {
-        tweetsAdapter.clear();
+        tweetsListFragment.clear();
         populateTimeline(perRequestTweetCount,1L,1L);
     }
 }

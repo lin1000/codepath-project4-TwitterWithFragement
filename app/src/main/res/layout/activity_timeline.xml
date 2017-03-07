@@ -19,11 +19,19 @@
             app:contentInsetStart="0dp">
         </android.support.v7.widget.Toolbar>
 
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/toolbar"
-            android:id="@+id/tweetListView" />
+        <fragment
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:name="com.codepath.apps.mysimpletweets.fragments.TweetsListFragment"
+            android:layout_below="@+id/toolbar"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/fragment_timeline"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true" />
+
+
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
