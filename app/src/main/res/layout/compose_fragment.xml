@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/toplayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                app:srcCompat="@drawable/ic_clear"
+                android:id="@+id/cancelImage"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toRightOf="@+id/cancelImage"
+            android:layout_toEndOf="@+id/cancelImage"
+            android:gravity="right"
+            android:padding="2dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="?android:attr/actionModeCopyDrawable"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/profile_image" />
+
+            <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/preferred_name"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/profile_image"
+                android:layout_toStartOf="@+id/profile_image"
+                android:textSize="10dp"
+                android:layout_marginRight="3dp" />
+
+            <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/screen_name"
+                android:layout_below="@+id/preferred_name"
+                android:layout_toLeftOf="@+id/profile_image"
+                android:layout_toStartOf="@+id/profile_image"
+                android:textSize="10dp"
+                android:layout_marginRight="3dp" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/edittextLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relativeLayout2">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:inputType="textMultiLine"
+            android:ems="10"
+            android:id="@+id/composeText"
+            android:layout_below="@+id/relativeLayout"
+            android:layout_centerHorizontal="true"
+            android:textAlignment="textStart"
+            android:padding="2dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/separatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/edittextLayout"
+        android:layout_centerHorizontal="true">
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/buttonlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/separatorLayout"
+        android:gravity="right"
+        android:padding="5dp">
+
+        <Button
+            android:text="Tweet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:id="@+id/tweet_button" />
+
+        <TextView
+            android:text="140"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_count"
+            tools:text="140"
+            android:textSize="12dp"
+            android:layout_toLeftOf="@+id/tweet_button"
+            android:layout_marginRight="40dp" />
+    </RelativeLayout>
+
+</RelativeLayout>
