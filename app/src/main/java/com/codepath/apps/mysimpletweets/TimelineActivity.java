@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
@@ -153,5 +154,10 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
 
     public TwitterClient getClient() {
         return client;
+    }
+
+    public void composeButton(View v){
+        Log.d("DEBUG", "composeButton clicked");
+        showComposeDialog();
     }
 }
