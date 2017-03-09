@@ -1,38 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_timeline"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context="com.codepath.apps.mysimpletweets.TimelineActivity">
 
-
-    <RelativeLayout
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:id="@+id/appBarLayout"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.astuetz.PagerSlidingTabStrip
+            android:id="@+id/tabs"
+            app:pstsShouldExpand="true"
+            app:pstsIndicatorColor="@color/colorUnderline"
+            app:pstsUnderlineColor="@color/colorUnderline"
+            app:pstsDividerColor="@color/colorBlackGray"
+            app:pstsIndicatorHeight="6dp"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/colorPrimary"
-            app:contentInsetLeft="0dp"
-            app:contentInsetStart="0dp">
-        </android.support.v7.widget.Toolbar>
+            android:layout_height="46dip"
+            android:textColor="#FFFFFF"
+            android:background="@color/colorPrimary"/>
 
-        <fragment
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:name="com.codepath.apps.mysimpletweets.fragments.TweetsListFragment"
-            android:layout_below="@+id/toolbar"
-            android:layout_centerHorizontal="true"
-            android:id="@+id/fragment_timeline"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true" />
+    </android.support.design.widget.AppBarLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_below="@+id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-
-    </RelativeLayout>
-
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btnAdd"
+        app:srcCompat="@drawable/twitter"
+        app:fabSize="normal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        app:layout_anchor="@id/viewpager"
+        app:layout_anchorGravity="bottom|right|end"
+        />
 </android.support.design.widget.CoordinatorLayout>
-

@@ -18,6 +18,7 @@ import com.raizlabs.android.dbflow.config.FlowManager;
  */
 public class TwitterApplication extends Application {
 	private static Context context;
+	private static TwitterClient client;
 
 	@Override
 	public void onCreate() {
@@ -30,6 +31,13 @@ public class TwitterApplication extends Application {
 	}
 
 	public static TwitterClient getRestClient() {
-		return (TwitterClient) TwitterClient.getInstance(TwitterClient.class, TwitterApplication.context);
+		if (client == null) {
+			synchronized (TwitterApplication.class){
+				if(client == null){
+					client = (TwitterClient) TwitterClient.getInstance(TwitterClient.class, TwitterApplication.context);
+				}
+			}
+		}
+		return client;
 	}
 }

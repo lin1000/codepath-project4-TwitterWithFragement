@@ -2,22 +2,21 @@ package com.codepath.apps.mysimpletweets;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.astuetz.PagerSlidingTabStrip;
+import com.codepath.apps.mysimpletweets.adapters.TimelineFragmentAdapter;
 import com.codepath.apps.mysimpletweets.fragments.ComposeDialogueFragment;
-import com.codepath.apps.mysimpletweets.fragments.TweetsListFragment;
-import com.codepath.apps.mysimpletweets.models.Tweet;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -25,11 +24,6 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
 
     private Toolbar tlToolbar;
     private TwitterClient client;
-
-    private TweetsListFragment tweetsListFragment;
-
-    private static long oldestTweetId=1;
-    private static int perRequestTweetCount = 20;
 
     private String userProfileImageUrl;
     private String userPreferredName;
@@ -42,16 +36,49 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
         setContentView(R.layout.activity_timeline);
 
         //Toolbar
-        tlToolbar = (Toolbar) findViewById(R.id.toolbar) ;
-        setSupportActionBar(tlToolbar);
-        getSupportActionBar().setLogo(R.drawable.twitter);
-        getSupportActionBar().setDisplayUseLogoEnabled (true);
+       // tlToolbar = (Toolbar) findViewById(R.id.toolbar) ;
+       // setSupportActionBar(tlToolbar);
+       // getSupportActionBar().setLogo(R.drawable.twitter);
+       // getSupportActionBar().setDisplayUseLogoEnabled (true);
 
-        //Get tweetsListFragment
-        tweetsListFragment = (TweetsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_timeline);
+        //ViewPager
+        // Get the ViewPager and set it's PagerAdapter so that it can display items
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        viewPager.setAdapter(new TimelineFragmentAdapter(getSupportFragmentManager()));
+
+        // Give the PagerSlidingTabStrip the ViewPager
+        PagerSlidingTabStrip tabsStrip = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        // Attach the view pager to the tab strip
+        tabsStrip.setViewPager(viewPager);
+
+        // Attach the page change listener to tab strip and **not** the view pager inside the activity
+        tabsStrip.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+            // This method will be invoked when a new page becomes selected.
+            @Override
+            public void onPageSelected(int position) {
+                Toast.makeText(TimelineActivity.this,
+                        "Selected page position: " + position, Toast.LENGTH_SHORT).show();
+            }
+
+            // This method will be invoked when the current page is scrolled
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                // Code goes here
+                Log.d("DEBUG","onPageScrolled position:" +position);
+            }
+
+            // Called when the scroll state changes:
+            // SCROLL_STATE_IDLE, SCROLL_STATE_DRAGGING, SCROLL_STATE_SETTLING
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                // Code goes here
+                Log.d("DEBUG","onPageScrollStateChanged state:" +state);
+            }
+        });
+
 
         client = TwitterApplication.getRestClient(); //singleton client
-        populateTimeline(perRequestTweetCount,1L,1L);
     }
 
     @Override
@@ -79,49 +106,6 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-
-    // Append the next page of data into the adapter
-    // This method probably sends out a network request and appends new data items to your adapter.
-    public void loadNextDataFromApi(int offset) {
-        // Send an API request to retrieve appropriate paginated data
-        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
-        populateTimeline(perRequestTweetCount,1,TimelineActivity.oldestTweetId-1);
-        //  --> Deserialize and construct new model objects from the API response
-        //  --> Append the new data objects to the existing set of items inside the array of items
-        //  --> Notify the adapter of the new items made with `notifyDataSetChanged()`
-    }
-
-    //send api quest to get tweets
-    //populate listview by creating tweets object from json
-    private void populateTimeline(int count , long since_id, long max_id){
-        Log.d("DEBUG", "populateTimeline=max_id="+max_id);
-
-        client.getHomeTimeline(count, since_id, max_id, new JsonHttpResponseHandler(){
-            //success
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
-                super.onSuccess(statusCode, headers, json);
-                //deserialize
-                //create model
-                //load into view
-                ArrayList<Tweet> tweets = Tweet.fromJSONArray(json);
-                if (tweets!=null && tweets.size()>1) {
-                    Tweet oldestTweet = tweets.get(tweets.size()-1);
-                    TimelineActivity.oldestTweetId = oldestTweet.getUid();
-                    Log.d("DEBUG","oldestTweetId="+ oldestTweetId);
-                }
-                tweetsListFragment.addAll(tweets);
-            }
-
-            //failure
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-                Log.d("DEBUG",errorResponse.toString());
-            }
-        });
     }
 
     private void showComposeDialog(){
@@ -163,7 +147,11 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
 
     @Override
     public void onFinishCompose() {
-        tweetsListFragment.clear();
-        populateTimeline(perRequestTweetCount,1L,1L);
+        //tweetsListFragment.clear();
+        //populateTimeline(perRequestTweetCount,1L,1L);
+    }
+
+    public TwitterClient getClient() {
+        return client;
     }
 }

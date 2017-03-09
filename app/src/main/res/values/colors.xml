@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3fa5b5</color><!--Background color for AppBar-->
+    <color name="colorPrimary">#1da1f2</color><!--Background color for AppBar-->
     <color name="colorPrimaryDark">#30819f</color><!--i ignore its use-->
     <color name="colorAccent">#FF4081</color><!--color effects, EditText, RadioButtons...-->
+    <color name="colorUnderline">#f5f8ff</color><!--i ignore its use-->
+    <color name="colorBlackGray">#2d2e30</color><!--i ignore its use-->
 </resources>

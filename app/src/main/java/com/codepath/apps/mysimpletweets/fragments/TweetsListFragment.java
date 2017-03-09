@@ -7,15 +7,23 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.codepath.apps.mysimpletweets.R;
+import com.codepath.apps.mysimpletweets.TwitterApplication;
 import com.codepath.apps.mysimpletweets.adapters.TweetsArrayAdapter;
 import com.codepath.apps.mysimpletweets.listeners.AbstractEndlessScrollListener;
 import com.codepath.apps.mysimpletweets.models.Tweet;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by lin1000 on 2017/3/8.
@@ -23,10 +31,34 @@ import java.util.List;
 
 public class TweetsListFragment extends Fragment {
 
+    public static final String ARG_PAGE = "ARG_PAGE";
+    private int mPage;
+
+    private static long oldestTweetId=1;
+    public static int perRequestTweetCount = 20;
+
     private ArrayList<Tweet> tweets;
     private TweetsArrayAdapter tweetsAdapter;
-    ListView lvTweets;
+    private ListView lvTweets;
+    private ImageView ivRateLimit;
 
+    public static TweetsListFragment newInstance(int page) {
+        Bundle args = new Bundle();
+        args.putInt(ARG_PAGE, page);
+        TweetsListFragment fragment = new TweetsListFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d("DEBUG", "onCreate");
+        tweets = new ArrayList<>();
+        tweetsAdapter = new TweetsArrayAdapter(getActivity(),tweets);
+        populateTimeline(perRequestTweetCount,1L,1L);
+    }
 
     @Nullable
     @Override
@@ -42,7 +74,7 @@ public class TweetsListFragment extends Fragment {
             public boolean onLoadMore(int page, int totalItemsCount) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to your AdapterView
-                //loadNextDataFromApi(page);
+                loadNextDataFromApi(page);
                 Log.d("DEBUG","onLoadMore:page"+ page);
                 Log.d("DEBUG","onLoadMore:totalItemsCount"+ totalItemsCount);
                 // or loadNextDataFromApi(totalItemsCount);
@@ -50,18 +82,12 @@ public class TweetsListFragment extends Fragment {
             }
         });
 
+        ivRateLimit = (ImageView) v.findViewById(R.id.rateLimit);
+        ivRateLimit.setVisibility(View.INVISIBLE);
+
         return v;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d("DEBUG", "onCreate");
-        tweets = new ArrayList<>();
-        tweetsAdapter = new TweetsArrayAdapter(getActivity(),tweets);
-
-
-    }
 
     public void addAll(List<Tweet> tweets){
         tweetsAdapter.addAll(tweets);
@@ -69,5 +95,51 @@ public class TweetsListFragment extends Fragment {
 
     public void clear(){
         tweetsAdapter.clear();
+    }
+
+
+    // Append the next page of data into the adapter
+    // This method probably sends out a network request and appends new data items to your adapter.
+    public void loadNextDataFromApi(int offset) {
+        // Send an API request to retrieve appropriate paginated data
+        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
+        populateTimeline(perRequestTweetCount,1,oldestTweetId-1);
+        //  --> Deserialize and construct new model objects from the API response
+        //  --> Append the new data objects to the existing set of items inside the array of items
+        //  --> Notify the adapter of the new items made with `notifyDataSetChanged()`
+    }
+
+
+    //send api quest to get tweets
+    //populate listview by creating tweets object from json
+    public void populateTimeline(int count , long since_id, long max_id){
+        Log.d("DEBUG", "populateTimeline=max_id="+max_id);
+
+        TwitterApplication.getRestClient().getHomeTimeline(count, since_id, max_id, new JsonHttpResponseHandler(){
+            //success
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
+                super.onSuccess(statusCode, headers, json);
+                //deserialize
+                //create model
+                //load into view
+                ArrayList<Tweet> tweets = Tweet.fromJSONArray(json);
+                if (tweets!=null && tweets.size()>1) {
+                    Tweet oldestTweet = tweets.get(tweets.size()-1);
+                    oldestTweetId = oldestTweet.getUid();
+                    Log.d("DEBUG","oldestTweetId="+ oldestTweetId);
+                }
+                addAll(tweets);
+            }
+
+            //failure
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Log.d("DEBUG",errorResponse.toString());
+                lvTweets.setVisibility(View.INVISIBLE);
+                ivRateLimit.setVisibility(View.VISIBLE);
+            }
+
+        });
     }
 }

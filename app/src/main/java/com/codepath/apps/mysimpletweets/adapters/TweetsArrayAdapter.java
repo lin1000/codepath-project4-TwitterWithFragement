@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.codepath.apps.mysimpletweets.R;
 import com.codepath.apps.mysimpletweets.models.Tweet;
 
@@ -82,15 +81,7 @@ public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
         if(tweet.getUser().getProfileImageUrl()!=null){
             System.out.println(tweet.getUser().getProfileImageUrl());
             String profileImageUrl = tweet.getUser().getProfileImageUrl();
-            Glide.with(getContext()).load(profileImageUrl).asBitmap().centerCrop().into(new BitmapImageViewTarget(viewHolder.ivProfileImage) {
-                @Override
-                protected void setResource(Bitmap resource) {
-                    RoundedBitmapDrawable circularBitmapDrawable = createRoundedBitmapDrawableWithBorder(getContext().getResources(),resource);
-                    circularBitmapDrawable.setCircular(true);
-                    //circularBitmapDrawable.setAlpha(100);
-                    viewHolder.ivProfileImage.setImageDrawable(circularBitmapDrawable);
-                }
-            });
+            Glide.with(getContext()).load(profileImageUrl).asBitmap().centerCrop().into(viewHolder.ivProfileImage);
         }
 
         viewHolder.tvPreferredName = (TextView) convertView.findViewById(R.id.preferred_name);
