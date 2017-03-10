@@ -91,6 +91,19 @@ public class TwitterClient extends OAuthBaseClient {
         getUserMention(count, since_id, 1L , handler);
     }
 
+    //Get UserTimeline
+    //statuses/user_timeline.json
+    public void getUserTimeline( String screenName, int count, long since_id, long max_id, AsyncHttpResponseHandler handler){
+        String apiUrl = getApiUrl("statuses/user_timeline.json");
+        RequestParams params = new RequestParams();
+        params.put("screenName", screenName);
+        params.put("count", count);
+        params.put("since_id", since_id);
+        if(max_id!=1L)
+            params.put("max_id",max_id);
+        getClient().get(apiUrl, params, handler);
+    }
+
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");
 	 * 2. Define the parameters to pass to the request (query or body)

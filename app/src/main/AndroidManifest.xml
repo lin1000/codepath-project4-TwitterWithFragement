@@ -35,6 +35,8 @@
         </activity>
         <activity android:name=".TimelineActivity"
             android:theme="@style/AppBaseTheme"></activity>
+        <activity android:name=".ProfileActivity"
+            android:theme="@style/AppBaseTheme"></activity>
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package com.codepath.apps.mysimpletweets;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -47,6 +48,7 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
     private String userScreenName;
     private int userFollowerCount;
     private int userFollowingCount;
+    private String userDescription;
 
 
     ComposeDialogueFragment composeDialogueFragment;
@@ -149,9 +151,9 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
                     TimelineActivity.this.userProfileImageUrl = jsonObject.getString("profile_image_url");
                     TimelineActivity.this.userPreferredName = jsonObject.getString("screen_name");
                     TimelineActivity.this.userScreenName =jsonObject.getString("name");
+                    TimelineActivity.this.userDescription =jsonObject.getString("description");
                     TimelineActivity.this.userFollowerCount = jsonObject.getInt("followers_count");
                     TimelineActivity.this.userFollowingCount = jsonObject.getInt("following");
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -237,9 +239,28 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
         showComposeDialog();
     }
 
+
+    public void launchProfilelView(){
+        // first parameter is the context, second is the class of the activity to launch
+        Intent intent = new Intent(TimelineActivity.this, ProfileActivity.class);
+        // put "extras" into the bundle for access in the second activity
+
+        intent.putExtra("userProfileBannerUrl", userProfileBannerUrl);
+        intent.putExtra("userProfileBackgroundImageUrl", userProfileBackgroundImageUrl);
+        intent.putExtra("userProfileImageUrl", userProfileImageUrl);
+        intent.putExtra("userPreferredName", userPreferredName);
+        intent.putExtra("userScreenName", userScreenName);
+        intent.putExtra("userFollowerCount", userFollowerCount);
+        intent.putExtra("userFollowingCount", userFollowingCount);
+        intent.putExtra("userDescription",userDescription);
+        log.d("DEBUG","userDescription="+userDescription);
+
+        startActivityForResult(intent,20);
+    }
+
     public void onClickProfileImage(View v){
         Log.d("DEBUG", "composeButton clicked");
-        showComposeDialog();
+        launchProfilelView();
     }
 
 
@@ -264,7 +285,6 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
-
 
             return theBitmap;
         }
