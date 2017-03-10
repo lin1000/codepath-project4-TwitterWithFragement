@@ -12,7 +12,7 @@ The following **required** functionality is completed:
 * [x] User can **switch between Timeline and Mention views using tabs**
   * [x] User can view their home timeline tweets.
   * [x] User can view the recent mentions of their username.
-* [ ] User can navigate to **view their own profile**
+* [x] User can navigate to **view their own profile**
   * [ ] User can see picture, tagline, # of followers, # of following, and tweets on their profile.
 * [ ] User can **click on the profile image** in any tweet to see **another user's** profile.
  * [ ] User can see picture, tagline, # of followers, # of following, and tweets of clicked user.
@@ -41,10 +41,11 @@ The following **bonus** features are implemented:
 
 The following **additional** features are implemented:
 
-* [v] List anything else that you can get done to improve the app functionality!
+* [x] List anything else that you can get done to improve the app functionality!
  
  ** Code Resuability : TimelineFragmentAdapter designed as abstract class and minimized code in HomeFragment and MentionFragment.
  ** Code Resuability : Reflection on FragmentFactory process to dyanmicall instantiate Fragments.
+ ** UI : CollapsingToolbarLayout
 
 
 ## Video Walkthrough

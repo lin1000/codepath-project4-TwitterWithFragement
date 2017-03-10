@@ -3,6 +3,10 @@
     <color name="colorPrimary">#1da1f2</color><!--Background color for AppBar-->
     <color name="colorPrimaryDark">#30819f</color><!--i ignore its use-->
     <color name="colorAccent">#FF4081</color><!--color effects, EditText, RadioButtons...-->
-    <color name="colorUnderline">#f5f8ff</color><!--i ignore its use-->
+    <color name="colorUnderline">#ffffff</color><!--i ignore its use-->
     <color name="colorBlackGray">#2d2e30</color><!--i ignore its use-->
+    <color name="translucent_scrim_top">#26000000</color>
+    <color name="translucent_scrim_top_center">#0C000000</color>
+    <color name="translucent_scrim_bottom">#2A000000</color>
+    <color name="translucent_scrim_bottom_center">#0D000000</color>
 </resources>

@@ -32,8 +32,8 @@ public abstract class TweetsListFragment extends Fragment {
     public static final String ARG_PAGE = "ARG_PAGE";
     private int mPage;
 
-    protected static long oldestTweetId=1;
-    protected static int perRequestTweetCount = 20;
+    protected long oldestTweetId=1;
+    protected int perRequestTweetCount = 20;
 
     protected ArrayList<Tweet> tweets;
     protected TweetsArrayAdapter tweetsAdapter;
@@ -68,8 +68,6 @@ public abstract class TweetsListFragment extends Fragment {
             }
 
     }
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -108,7 +106,6 @@ public abstract class TweetsListFragment extends Fragment {
         return v;
     }
 
-
     public void addAll(List<Tweet> tweets){
         tweetsAdapter.addAll(tweets);
     }
@@ -116,7 +113,6 @@ public abstract class TweetsListFragment extends Fragment {
     public void clear(){
         tweetsAdapter.clear();
     }
-
 
     // Append the next page of data into the adapter
     // This method probably sends out a network request and appends new data items to your adapter.
@@ -131,11 +127,11 @@ public abstract class TweetsListFragment extends Fragment {
 
     abstract public void populateTimeline(int count , long since_id, long max_id);
 
-    public static long getOldestTweetId() {
+    public long getOldestTweetId() {
         return oldestTweetId;
     }
 
-    public static int getPerRequestTweetCount() {
+    public int getPerRequestTweetCount() {
         return perRequestTweetCount;
     }
 
@@ -159,11 +155,11 @@ public abstract class TweetsListFragment extends Fragment {
         return mPage;
     }
 
-    public static void setPerRequestTweetCount(int perRequestTweetCount) {
-        TweetsListFragment.perRequestTweetCount = perRequestTweetCount;
+    public void setPerRequestTweetCount(int perRequestTweetCount) {
+        this.perRequestTweetCount = perRequestTweetCount;
     }
 
-    public static void setOldestTweetId(long oldestTweetId) {
-        TweetsListFragment.oldestTweetId = oldestTweetId;
+    public  void setOldestTweetId(long oldestTweetId) {
+        this.oldestTweetId = oldestTweetId;
     }
 }
