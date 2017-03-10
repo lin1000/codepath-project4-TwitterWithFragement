@@ -45,7 +45,7 @@ public abstract class TweetsListFragment extends Fragment {
             //success
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
-                super.onSuccess(statusCode, headers, json);
+                Log.d("DEBUG", "statusCode X JSON = "+json.toString());
                 //deserialize
                 //create model
                 //load into view

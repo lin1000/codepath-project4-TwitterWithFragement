@@ -14,10 +14,11 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/profileToolbar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="20dp"
         android:minHeight="?attr/actionBarSize"
         app:titleTextColor="@android:color/white"
         android:background="@color/colorPrimary"
+        app:layout_scrollFlags="scroll|enterAlways"
         >
     </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
@@ -49,6 +50,7 @@
                 android:text="tagline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:id="@+id/tagline" />
         </LinearLayout>
         <LinearLayout
@@ -81,9 +83,19 @@
                 android:layout_weight="1" />
         </LinearLayout>
 
+        <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileCounts"
+            android:height="1dp"
+            android:maxHeight="1dp"
+            android:background="@color/colorAccent"
+            android:id="@+id/sepline" />
+
         <android.support.v4.view.ViewPager
             android:id="@+id/viewpager"
-            android:layout_below="@+id/profileCounts"
+            android:layout_below="@+id/sepline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"

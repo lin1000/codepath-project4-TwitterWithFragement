@@ -59,7 +59,9 @@ public class ProfileActivity extends AppCompatActivity {
 
 
         //Reuse View Pager
+        Log.d("DEBUG", "ProfileActivity.userScreenName="+userScreenName );
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        //Must give PreferredName
         viewPager.setAdapter(new ProfileFragmentAdapter(getSupportFragmentManager(),userScreenName));
 
     }

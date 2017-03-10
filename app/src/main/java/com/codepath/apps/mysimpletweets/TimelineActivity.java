@@ -19,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.bumptech.glide.Glide;
@@ -82,8 +81,8 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
             // This method will be invoked when a new page becomes selected.
             @Override
             public void onPageSelected(int position) {
-                Toast.makeText(TimelineActivity.this,
-                        "Selected page position: " + position, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(TimelineActivity.this,
+                //        "Selected page position: " + position, Toast.LENGTH_SHORT).show();
             }
 
             // This method will be invoked when the current page is scrolled
@@ -253,7 +252,6 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
         intent.putExtra("userFollowerCount", userFollowerCount);
         intent.putExtra("userFollowingCount", userFollowingCount);
         intent.putExtra("userDescription",userDescription);
-        log.d("DEBUG","userDescription="+userDescription);
 
         startActivityForResult(intent,20);
     }
@@ -262,9 +260,6 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
         Log.d("DEBUG", "composeButton clicked");
         launchProfilelView();
     }
-
-
-
 
     private class ProfileOperation extends AsyncTask<String, Void, Bitmap> {
         @Override

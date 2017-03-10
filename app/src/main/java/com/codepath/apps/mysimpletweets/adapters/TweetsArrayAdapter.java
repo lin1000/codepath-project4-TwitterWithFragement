@@ -1,14 +1,9 @@
 package com.codepath.apps.mysimpletweets.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.support.annotation.NonNull;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,10 +13,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.codepath.apps.mysimpletweets.ProfileActivity;
 import com.codepath.apps.mysimpletweets.R;
+import com.codepath.apps.mysimpletweets.TwitterApplication;
+import com.codepath.apps.mysimpletweets.listeners.AbstractTweetsImageViewClickListener;
 import com.codepath.apps.mysimpletweets.models.Tweet;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+
+import cz.msebera.android.httpclient.Header;
+
+import static android.util.Log.d;
 
 /**
  * Created by lin1000 on 2017/3/5.
@@ -55,8 +63,8 @@ public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
 
     @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Tweet tweet = getItem(position);
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        final Tweet tweet = getItem(position);
 
         //Get ViewHolder
         final ViewHolder viewHolder;
@@ -81,8 +89,86 @@ public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
         if(tweet.getUser().getProfileImageUrl()!=null){
             System.out.println(tweet.getUser().getProfileImageUrl());
             String profileImageUrl = tweet.getUser().getProfileImageUrl();
-            Glide.with(getContext()).load(profileImageUrl).asBitmap().centerCrop().into(viewHolder.ivProfileImage);
+            Picasso.with(getContext()).load(profileImageUrl).resize(55,55).into(viewHolder.ivProfileImage);
         }
+
+        viewHolder.ivProfileImage.setOnClickListener(new AbstractTweetsImageViewClickListener(position) {
+            @Override
+            public void onClick(View view) {
+
+                d("DEBUG", "TweetProfileImageClicked");
+                final Intent intent = new Intent(getContext(), ProfileActivity.class);
+                Log.d("DEBUG","tweet.getUser().getScreenName()=" + tweet.getUser().getScreenName());
+                Log.d("DEBUG"," getItem(position).getUser().getScreenName()=" + getItem(position).getUser().getScreenName());
+                TwitterApplication.getRestClient().userLookup(tweet.getUser().getScreenName(),new JsonHttpResponseHandler(){
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONArray jsonArray) {
+                        Log.d("DEBUG",jsonArray.toString());
+                        try {
+                            if(jsonArray.get(0)!=null){
+                                JSONObject jsonObject = jsonArray.getJSONObject(0);
+                                Log.d("DEBUG",jsonObject.toString());
+
+                                String userProfileBannerUrl = null;
+                                String userProfileBackgroundImageUrl = null;
+                                String userProfileImageUrl = null;
+                                String userPreferredName = null;
+                                String userScreenName = null;
+                                String userDescription = null;
+                                int userFollowerCount=0;
+                                int userFollowingCount=0;
+                                try {
+                                     userProfileBannerUrl = jsonObject.getString("profile_banner_url");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    try {userProfileBannerUrl =  jsonObject.getString("profile_background_image_url"); }catch (JSONException e1) {e1.printStackTrace();}
+                                }
+                                try {userProfileBackgroundImageUrl =  jsonObject.getString("profile_background_image_url"); }catch (JSONException e) {
+                                    e.printStackTrace();
+                                    try {userProfileBackgroundImageUrl =  jsonObject.getString("profile_banner_url"); }catch (JSONException e1) {e1.printStackTrace();}
+                                }
+                                try {userProfileImageUrl = jsonObject.getString("profile_image_url"); }catch (JSONException e) {e.printStackTrace();}
+                                try {userPreferredName = jsonObject.getString("name"); }catch (JSONException e) {e.printStackTrace();}
+                                try {userScreenName =jsonObject.getString("screen_name"); }catch (JSONException e) {e.printStackTrace();}
+                                try {userDescription =jsonObject.getString("description"); }catch (JSONException e) {e.printStackTrace();}
+                                try {userFollowerCount =  jsonObject.getInt("followers_count"); }catch (JSONException e) {e.printStackTrace();}
+                                try {userFollowingCount =jsonObject.getInt("following"); }catch (JSONException e) {e.printStackTrace();}
+
+                                intent.putExtra("userProfileBannerUrl", userProfileBannerUrl);
+                                intent.putExtra("userProfileBackgroundImageUrl", userProfileBackgroundImageUrl);
+                                intent.putExtra("userProfileImageUrl", userProfileImageUrl);
+                                intent.putExtra("userPreferredName", userPreferredName);
+                                intent.putExtra("userScreenName", userScreenName);
+                                intent.putExtra("userFollowerCount", userFollowerCount);
+                                intent.putExtra("userFollowingCount", userFollowingCount);
+                                intent.putExtra("userDescription",userDescription);
+
+                                getContext().startActivity(intent);
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    //failure
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                        super.onFailure(statusCode, headers, throwable, errorResponse);
+                        Log.d("DEBUG",errorResponse.toString());
+                    }
+                });
+
+
+                d("DEBUG","view.toString()="+view.toString());
+
+
+
+            }
+        });
+
 
         viewHolder.tvPreferredName = (TextView) convertView.findViewById(R.id.preferred_name);
         viewHolder.tvPreferredName.setText(tweet.getUser().getName());
@@ -119,8 +205,8 @@ public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
 
 
         if(tweet.getExtendedEntities() != null){
-            Log.d("DEBUG","viewHolder.ivTweetImages.size()="+viewHolder.ivTweetImages.size());
-            Log.d("DEBUG","tweet.getExtendedEntities().getMedia().size())="+tweet.getExtendedEntities().getMedia().size());
+            d("DEBUG","viewHolder.ivTweetImages.size()="+viewHolder.ivTweetImages.size());
+            d("DEBUG","tweet.getExtendedEntities().getMedia().size())="+tweet.getExtendedEntities().getMedia().size());
             for(int i=0 ; i < tweet.getExtendedEntities().getMedia().size() ; i++){
                 if(i >=  viewHolder.ivTweetImages.size()) break;
                 String tweetImage1Url = tweet.getExtendedEntities().getMedia().get(i).getMediaUrl();

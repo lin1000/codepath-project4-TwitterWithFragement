@@ -28,7 +28,9 @@ public class ProfileFragmentAdapter extends FragmentPagerAdapter {
     private String screenName;
 
     public ProfileFragmentAdapter(FragmentManager m, String screenName) {
-        super(m); this.screenName = screenName;
+        super(m);
+        Log.d("DEBUG","ProfileFragmentAdapter ProfileFragmentAdapter.screenName="+ screenName);
+        this.screenName = screenName;
     }
 
     @Override
@@ -44,6 +46,7 @@ public class ProfileFragmentAdapter extends FragmentPagerAdapter {
             Method m = tabFactories[position].getDeclaredMethod("newInstance", int.class, Class.class);
             o = m.invoke(null, position+1, tabClasses[position]);
             MyTweetsFragment myTweetsFragment = (MyTweetsFragment) o;
+            Log.d("DEBUG","getItem ProfileFragmentAdapter.screenName="+ screenName);
             myTweetsFragment.setScreenName(screenName);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
