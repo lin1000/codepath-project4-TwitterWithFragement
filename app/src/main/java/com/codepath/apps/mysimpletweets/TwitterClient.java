@@ -49,16 +49,16 @@ public class TwitterClient extends OAuthBaseClient {
     }
 
 	public void getHomeTimeline(int count, long since_id, long max_id, AsyncHttpResponseHandler handler){
-		String apiUrl = getApiUrl("statuses/home_timeline.json");
-		RequestParams params = new RequestParams();
-		params.put("count", count);
-		params.put("since_id",since_id);
+        String apiUrl = getApiUrl("statuses/home_timeline.json");
+        RequestParams params = new RequestParams();
+        params.put("count", count);
+        params.put("since_id",since_id);
         Log.d("DEBUG", "mmax_id="+ max_id);
         if(max_id!=1L)
             params.put("max_id",max_id);
-		//Execute the request
-		getClient().get(apiUrl, params, handler);
-	}
+        //Execute the request
+        getClient().get(apiUrl, params, handler);
+    }
 
 	//statuses/update.json
 	public void composeTweet(String status, AsyncHttpResponseHandler handler){
@@ -75,8 +75,21 @@ public class TwitterClient extends OAuthBaseClient {
         getClient().get(apiUrl, params, handler);
     }
 
+	//GetMention
+	//https://api.twitter.com/1.1/statuses/user_timeline.json?count=25&since_id=1&user_id=557851482&screen_name=Irene09106916
+    public void getUserMention( int count, long since_id, long max_id, AsyncHttpResponseHandler handler){
+        String apiUrl = getApiUrl("statuses/mentions_timeline.json");
+        RequestParams params = new RequestParams();
+        params.put("count", count);
+        params.put("since_id", since_id);
+        if(max_id!=1L)
+            params.put("max_id",max_id);
+        getClient().get(apiUrl, params, handler);
+    }
 
-    // COMPOST TWEET
+    public void getUserMention( int count, long since_id, AsyncHttpResponseHandler handler){
+        getUserMention(count, since_id, 1L , handler);
+    }
 
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");

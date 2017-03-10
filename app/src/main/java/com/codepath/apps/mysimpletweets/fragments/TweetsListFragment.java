@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.codepath.apps.mysimpletweets.R;
-import com.codepath.apps.mysimpletweets.TwitterApplication;
 import com.codepath.apps.mysimpletweets.adapters.TweetsArrayAdapter;
 import com.codepath.apps.mysimpletweets.listeners.AbstractEndlessScrollListener;
 import com.codepath.apps.mysimpletweets.models.Tweet;
@@ -29,26 +28,47 @@ import cz.msebera.android.httpclient.Header;
  * Created by lin1000 on 2017/3/8.
  */
 
-public class TweetsListFragment extends Fragment {
-
+public abstract class TweetsListFragment extends Fragment {
     public static final String ARG_PAGE = "ARG_PAGE";
     private int mPage;
 
-    private static long oldestTweetId=1;
-    public static int perRequestTweetCount = 20;
+    protected static long oldestTweetId=1;
+    protected static int perRequestTweetCount = 20;
 
-    private ArrayList<Tweet> tweets;
-    private TweetsArrayAdapter tweetsAdapter;
-    private ListView lvTweets;
-    private ImageView ivRateLimit;
+    protected ArrayList<Tweet> tweets;
+    protected TweetsArrayAdapter tweetsAdapter;
+    protected ListView lvTweets;
+    protected ImageView ivRateLimit;
 
-    public static TweetsListFragment newInstance(int page) {
-        Bundle args = new Bundle();
-        args.putInt(ARG_PAGE, page);
-        TweetsListFragment fragment = new TweetsListFragment();
-        fragment.setArguments(args);
-        return fragment;
+    protected class DefaultJsonHttpResponseHandler extends JsonHttpResponseHandler{
+
+            //success
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
+                super.onSuccess(statusCode, headers, json);
+                //deserialize
+                //create model
+                //load into view
+                ArrayList<Tweet> tweets = Tweet.fromJSONArray(json);
+                if (tweets!=null && tweets.size()>1) {
+                    Tweet oldestTweet = tweets.get(tweets.size()-1);
+                    setOldestTweetId(oldestTweet.getUid());
+                    Log.d("DEBUG","oldestTweetId="+ oldestTweetId);
+                }
+                addAll(tweets);
+            }
+
+            //failure
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject
+            errorResponse) {
+                Log.d("DEBUG",errorResponse.toString());
+                getLvTweets().setVisibility(View.INVISIBLE);
+                getIvRateLimit().setVisibility(View.VISIBLE);
+            }
+
     }
+
 
 
     @Override
@@ -65,7 +85,7 @@ public class TweetsListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_tweets_list, container, false);
 
-        Log.d("DEBUG", "onCreatevIEW");
+        Log.d("DEBUG", "onCreateView");
         lvTweets = (ListView) v.findViewById(R.id.tweetListView);
         lvTweets.setAdapter(tweetsAdapter);
         // Attach the listener to the AdapterView onCreate
@@ -109,37 +129,41 @@ public class TweetsListFragment extends Fragment {
         //  --> Notify the adapter of the new items made with `notifyDataSetChanged()`
     }
 
+    abstract public void populateTimeline(int count , long since_id, long max_id);
 
-    //send api quest to get tweets
-    //populate listview by creating tweets object from json
-    public void populateTimeline(int count , long since_id, long max_id){
-        Log.d("DEBUG", "populateTimeline=max_id="+max_id);
+    public static long getOldestTweetId() {
+        return oldestTweetId;
+    }
 
-        TwitterApplication.getRestClient().getHomeTimeline(count, since_id, max_id, new JsonHttpResponseHandler(){
-            //success
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray json) {
-                super.onSuccess(statusCode, headers, json);
-                //deserialize
-                //create model
-                //load into view
-                ArrayList<Tweet> tweets = Tweet.fromJSONArray(json);
-                if (tweets!=null && tweets.size()>1) {
-                    Tweet oldestTweet = tweets.get(tweets.size()-1);
-                    oldestTweetId = oldestTweet.getUid();
-                    Log.d("DEBUG","oldestTweetId="+ oldestTweetId);
-                }
-                addAll(tweets);
-            }
+    public static int getPerRequestTweetCount() {
+        return perRequestTweetCount;
+    }
 
-            //failure
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                Log.d("DEBUG",errorResponse.toString());
-                lvTweets.setVisibility(View.INVISIBLE);
-                ivRateLimit.setVisibility(View.VISIBLE);
-            }
+    public ArrayList<Tweet> getTweets() {
+        return tweets;
+    }
 
-        });
+    public TweetsArrayAdapter getTweetsAdapter() {
+        return tweetsAdapter;
+    }
+
+    public ListView getLvTweets() {
+        return lvTweets;
+    }
+
+    public ImageView getIvRateLimit() {
+        return ivRateLimit;
+    }
+
+    public int getmPage() {
+        return mPage;
+    }
+
+    public static void setPerRequestTweetCount(int perRequestTweetCount) {
+        TweetsListFragment.perRequestTweetCount = perRequestTweetCount;
+    }
+
+    public static void setOldestTweetId(long oldestTweetId) {
+        TweetsListFragment.oldestTweetId = oldestTweetId;
     }
 }
