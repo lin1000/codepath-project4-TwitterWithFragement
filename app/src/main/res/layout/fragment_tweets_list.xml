@@ -2,12 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="false"
+    android:layout_centerInParent="false">
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvTweetsList"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/tweetListView" />
+        android:layout_height="wrap_content" />
 
     <ImageView
         android:layout_width="match_parent"
@@ -15,5 +18,13 @@
         android:layout_gravity="center_vertical|center_horizontal"
         app:srcCompat="@drawable/twitter"
         android:id="@+id/rateLimit" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:id="@+id/rateLimitText"
+        android:gravity="center_vertical|center" />
 
 </LinearLayout>

@@ -1,8 +1,12 @@
 package com.codepath.apps.mysimpletweets.listeners;
 
-import android.widget.AbsListView;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 
-public abstract class AbstractEndlessScrollListener implements AbsListView.OnScrollListener {
+
+public abstract class AbstractEndlessScrollListener extends RecyclerView.OnScrollListener {
     // The minimum number of items to have below your current scroll position
     // before loading more.
     private int visibleThreshold = 5;
@@ -15,53 +19,90 @@ public abstract class AbstractEndlessScrollListener implements AbsListView.OnScr
     // Sets the starting page index
     private int startingPageIndex = 0;
 
-    public AbstractEndlessScrollListener() {
+    RecyclerView.LayoutManager mLayoutManager;
+
+    public AbstractEndlessScrollListener(LinearLayoutManager layoutManager) {
+        mLayoutManager = layoutManager;
     }
 
-    public AbstractEndlessScrollListener(int visibleThreshold) {
-        this.visibleThreshold = visibleThreshold;
+    public AbstractEndlessScrollListener(GridLayoutManager layoutManager) {
+        this.mLayoutManager = layoutManager;
+        visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
     }
 
-    public AbstractEndlessScrollListener(int visibleThreshold, int startPage) {
-        this.visibleThreshold = visibleThreshold;
-        this.startingPageIndex = startPage;
-        this.currentPage = startPage;
+    public AbstractEndlessScrollListener(StaggeredGridLayoutManager layoutManager) {
+        this.mLayoutManager = layoutManager;
+        visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
     }
 
+    public int getLastVisibleItem(int[] lastVisibleItemPositions) {
+        int maxSize = 0;
+        for (int i = 0; i < lastVisibleItemPositions.length; i++) {
+            if (i == 0) {
+                maxSize = lastVisibleItemPositions[i];
+            }
+            else if (lastVisibleItemPositions[i] > maxSize) {
+                maxSize = lastVisibleItemPositions[i];
+            }
+        }
+        return maxSize;
+    }
 
+    // This happens many times a second during a scroll, so be wary of the code you place here.
+    // We are given a few useful parameters to help us work out if we need to load some more data,
+    // but first we check if we are waiting for the previous load to finish.
     @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
-    {
+    public void onScrolled(RecyclerView view, int dx, int dy) {
+        int lastVisibleItemPosition = 0;
+        int totalItemCount = mLayoutManager.getItemCount();
+
+        if (mLayoutManager instanceof StaggeredGridLayoutManager) {
+            int[] lastVisibleItemPositions = ((StaggeredGridLayoutManager) mLayoutManager).findLastVisibleItemPositions(null);
+            // get maximum element within the list
+            lastVisibleItemPosition = getLastVisibleItem(lastVisibleItemPositions);
+        } else if (mLayoutManager instanceof GridLayoutManager) {
+            lastVisibleItemPosition = ((GridLayoutManager) mLayoutManager).findLastVisibleItemPosition();
+        } else if (mLayoutManager instanceof LinearLayoutManager) {
+            lastVisibleItemPosition = ((LinearLayoutManager) mLayoutManager).findLastVisibleItemPosition();
+        }
+
         // If the total item count is zero and the previous isn't, assume the
         // list is invalidated and should be reset back to initial state
         if (totalItemCount < previousTotalItemCount) {
             this.currentPage = this.startingPageIndex;
             this.previousTotalItemCount = totalItemCount;
-            if (totalItemCount == 0) { this.loading = true; }
+            if (totalItemCount == 0) {
+                this.loading = true;
+            }
         }
-        // If it's still loading, we check to see if the dataset count has
+        // If it’s still loading, we check to see if the dataset count has
         // changed, if so we conclude it has finished loading and update the current page
         // number and total item count.
         if (loading && (totalItemCount > previousTotalItemCount)) {
             loading = false;
             previousTotalItemCount = totalItemCount;
-            currentPage++;
         }
 
-        // If it isn't currently loading, we check to see if we have breached
+        // If it isn’t currently loading, we check to see if we have breached
         // the visibleThreshold and need to reload more data.
         // If we do need to reload some more data, we execute onLoadMore to fetch the data.
-        if (!loading && (firstVisibleItem + visibleItemCount + visibleThreshold) >= totalItemCount ) {
-            loading = onLoadMore(currentPage + 1, totalItemCount);
+        // threshold should reflect how many total columns there are too
+        if (!loading && (lastVisibleItemPosition + visibleThreshold) > totalItemCount) {
+            currentPage++;
+            onLoadMore(currentPage, totalItemCount, view);
+            loading = true;
         }
     }
 
     // Defines the process for actually loading more data based on page
-    // Returns true if more data is being loaded; returns false if there is no more data to load.
-    public abstract boolean onLoadMore(int page, int totalItemsCount);
+    public abstract void onLoadMore(int page, int totalItemsCount, RecyclerView view);
 
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        // Don't take any action on changed
+
+    // Call this method whenever performing new searches
+    public void resetState() {
+        this.currentPage = this.startingPageIndex;
+        this.previousTotalItemCount = 0;
+        this.loading = true;
     }
+
 }

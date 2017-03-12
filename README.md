@@ -46,6 +46,7 @@ The following **additional** features are implemented:
  ** Code Resuability : TimelineFragmentAdapter designed as abstract class and minimized code in HomeFragment and MentionFragment.
  ** Code Resuability : Reflection on FragmentFactory process to dyanmicall instantiate Fragments.
  ** UI : CollapsingToolbarLayout
+ ** Error Handling : Show "Oops! Rate limit was reachead " when reaching it.
 
 
 ## Video Walkthrough
@@ -67,7 +68,7 @@ Describe any challenges encountered while building the app.
 
 ## License
 
-    Copyright [yyyy] [name of copyright owner]
+    Copyright [2017] [Tony]
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
