@@ -43,10 +43,10 @@ The following **additional** features are implemented:
 
 * [x] List anything else that you can get done to improve the app functionality!
  
- ** Code Resuability : TimelineFragmentAdapter designed as abstract class and minimized code in HomeFragment and MentionFragment.
- ** Code Resuability : Reflection on FragmentFactory process to dyanmicall instantiate Fragments.
- ** UI : CollapsingToolbarLayout
- ** Error Handling : Show "Oops! Rate limit was reachead " when reaching it.
+  * Code Resuability : TimelineFragmentAdapter designed as abstract class and minimized code in HomeFragment and MentionFragment.
+  * Code Resuability : Reflection on FragmentFactory process to dyanmicall instantiate Fragments.
+  * UI : CollapsingToolbarLayout
+  * Error Handling : Show "Oops! Rate limit was reachead " when reaching it.
 
 
 ## Video Walkthrough
