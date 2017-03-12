@@ -3,16 +3,15 @@ package com.codepath.apps.mysimpletweets.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.codepath.apps.mysimpletweets.ProfileActivity;
 import com.codepath.apps.mysimpletweets.R;
 import com.codepath.apps.mysimpletweets.TwitterApplication;
@@ -26,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -35,205 +35,252 @@ import static android.util.Log.d;
  * Created by lin1000 on 2017/3/5.
  */
 
-public class TweetsArrayAdapter extends ArrayAdapter<Tweet> {
+public class TweetsArrayAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    static class ViewHolder{
-        ImageView ivProfileImage;
-        TextView tvPreferredName;
-        TextView tvScreenName;
-        TextView tvTweetBody;
-        ImageView ivTweetImage1;
-        ImageView ivTweetImage2;
-        ArrayList<ImageView> ivTweetImages;
-        TextView tvRelativeTimeAgo;
+    public static class GeneralTweetViewHolder  extends RecyclerView.ViewHolder {
+        public ImageView ivProfileImage;
+        public TextView tvPreferredName;
+        public TextView tvScreenName;
+        public TextView tvTweetBody;
+        public ImageView ivTweetImage1;
+        public ImageView ivTweetImage2;
+        public TextView tvRelativeTimeAgo;
+//        ArrayList<ImageView> ivTweetImages;
 
-//        @Nullable @BindView(R.id.preferred_name) TextView tvPreferredName;
-//        @Nullable @BindView(R.id.screen_name) TextView tvScreenName;
-//        @Nullable @BindView(R.id.tweet_image1) ImageView ivTweetImage1;
-
-
-        public ViewHolder(View view) {
+        public GeneralTweetViewHolder(View view) {
+            super(view);
+            d("DEBUG", "ViewHolder");
+            ivProfileImage = (ImageView) view.findViewById(R.id.profile_image);
+            tvPreferredName = (TextView) view.findViewById(R.id.preferred_name);
+            tvScreenName = (TextView) view.findViewById(R.id.screen_name);
+            tvRelativeTimeAgo = (TextView) view.findViewById(R.id.relative_time_ago);
+            tvTweetBody = (TextView) view.findViewById(R.id.tweet_body);
+            ivTweetImage1 = (ImageView) view.findViewById(R.id.tweet_image1);
+            ivTweetImage2 = (ImageView) view.findViewById(R.id.tweet_image2);
+//            if(ivTweetImages == null) {
+//                ivTweetImages =  new ArrayList<>();
+//                ivTweetImages.add(ivTweetImage1);
+//                ivTweetImages.add(ivTweetImage2);
+//            }
 
         }
     }
+
+    public static class ProgressViewHolder  extends RecyclerView.ViewHolder {
+        public ProgressBar ivProgressBar;
+        public View loadingPanel;
+
+        public ProgressViewHolder(View view) {
+            super(view);
+            ivProgressBar = (ProgressBar) view.findViewById(R.id.progressbar_image);
+            loadingPanel = view.findViewById(R.id.loadingPanel);
+        }
+
+    }
+    // Store a member variable for the contacts
+    private List<Tweet> tweetsList;
+    // Store the context for easy access
+    private Context context;
+
+    //Different View Types
+    private static final int VIEW_GENERAL_TWEET = 1;
+    private static final int VIEW_PROGRESS = 9;
 
     public TweetsArrayAdapter(Context context, ArrayList<Tweet> tweets){
-        super(context, android.R.layout.simple_list_item_1, tweets);
+        tweetsList = tweets;
+        this.context = context;
+
+    }
+    private Context getContext(){
+        return context;
     }
 
-    @NonNull
+    // Usually involves inflating a layout from XML and returning the holder
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        final Tweet tweet = getItem(position);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Context context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
 
-        //Get ViewHolder
-        final ViewHolder viewHolder;
+        RecyclerView.ViewHolder viewHolder = null;
+        View tweetView = null;
+        switch(viewType){
+            case VIEW_GENERAL_TWEET:
+                // Inflate the custom layout
+                tweetView = inflater.inflate(R.layout.item_tweet, parent, false);
+                // Return a new holder instance
+                viewHolder = new GeneralTweetViewHolder(tweetView);
 
-        if(convertView==null){
-
-            LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.item_tweet,parent,false);
-
-            //initialize view holder
-            viewHolder = new ViewHolder(convertView);
-
-            //conver view keep the reference for view holder
-            convertView.setTag(viewHolder);
-        }else{
-            // View is being recycled, retrieve the viewHolder object from tag
-            viewHolder = (ViewHolder) convertView.getTag();
+                break;
+            case VIEW_PROGRESS:
+                // Inflate the custom layout
+                tweetView = inflater.inflate(R.layout.item_progress, parent, false);
+                // Return a new holder instance
+                viewHolder = new ProgressViewHolder(tweetView);
+                break;
         }
 
-        viewHolder.ivProfileImage = (ImageView) convertView.findViewById(R.id.profile_image);
-        viewHolder.ivProfileImage.setImageResource(0);
-        if(tweet.getUser().getProfileImageUrl()!=null){
-            System.out.println(tweet.getUser().getProfileImageUrl());
-            String profileImageUrl = tweet.getUser().getProfileImageUrl();
-            Picasso.with(getContext()).load(profileImageUrl).resize(55,55).into(viewHolder.ivProfileImage);
-        }
 
-        viewHolder.ivProfileImage.setOnClickListener(new AbstractTweetsImageViewClickListener(position) {
-            @Override
-            public void onClick(View view) {
+        Log.d("DEBUG","onCreateViewHolder viewType="+ viewType);
 
-                d("DEBUG", "TweetProfileImageClicked");
-                final Intent intent = new Intent(getContext(), ProfileActivity.class);
-                Log.d("DEBUG","tweet.getUser().getScreenName()=" + tweet.getUser().getScreenName());
-                Log.d("DEBUG"," getItem(position).getUser().getScreenName()=" + getItem(position).getUser().getScreenName());
-                TwitterApplication.getRestClient().userLookup(tweet.getUser().getScreenName(),new JsonHttpResponseHandler(){
+        return viewHolder;
+    }
 
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray jsonArray) {
-                        Log.d("DEBUG",jsonArray.toString());
-                        try {
-                            if(jsonArray.get(0)!=null){
-                                JSONObject jsonObject = jsonArray.getJSONObject(0);
-                                Log.d("DEBUG",jsonObject.toString());
+    // Involves populating data into the item through holder
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
+        d("DEBUG", "onBindViewHolder");
+        // Get the data model based on position
+        final Tweet tweet = tweetsList.get(position);
 
-                                String userProfileBannerUrl = null;
-                                String userProfileBackgroundImageUrl = null;
-                                String userProfileImageUrl = null;
-                                String userPreferredName = null;
-                                String userScreenName = null;
-                                String userDescription = null;
-                                int userFollowerCount=0;
-                                int userFollowingCount=0;
-                                try {
-                                     userProfileBannerUrl = jsonObject.getString("profile_banner_url");
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                    try {userProfileBannerUrl =  jsonObject.getString("profile_background_image_url"); }catch (JSONException e1) {e1.printStackTrace();}
+        if(viewHolder instanceof GeneralTweetViewHolder) {
+            GeneralTweetViewHolder vh = (GeneralTweetViewHolder) viewHolder;
+
+            // Set item views based on your views and data model
+            ImageView ivProfileImage = vh.ivProfileImage;
+            TextView tvPreferredName = vh.tvPreferredName;
+            TextView tvScreenName = vh.tvScreenName;
+            TextView tvTweetBody = vh.tvTweetBody;
+            ImageView ivTweetImage1 = vh.ivTweetImage1;
+            ImageView ivTweetImage2 = vh.ivTweetImage2;
+            TextView tvRelativeTimeAgo = vh.tvRelativeTimeAgo;
+            //ArrayList<ImageView> ivTweetImages = viewHolder.ivTweetImages;
+
+            vh.ivProfileImage.setImageResource(0);
+            if (tweet.getUser().getProfileImageUrl() != null) {
+                d("DEBUG", "tweet.getUser().getProfileImageUrl()=" + tweet.getUser().getProfileImageUrl());
+                String profileImageUrl = tweet.getUser().getProfileImageUrl();
+                Picasso.with(getContext()).load(profileImageUrl).resize(55, 55).into(vh.ivProfileImage);
+            }
+
+            ivProfileImage.setOnClickListener(new AbstractTweetsImageViewClickListener(position) {
+                @Override
+                public void onClick(View view) {
+
+                    d("DEBUG", "TweetProfileImageClicked");
+                    final Intent intent = new Intent(getContext(), ProfileActivity.class);
+                    d("DEBUG", "tweet.getUser().getScreenName()=" + tweet.getUser().getScreenName());
+                    d("DEBUG", " getItem(position).getUser().getScreenName()=" + tweetsList.get(position).getUser().getScreenName());
+                    TwitterApplication.getRestClient().userLookup(tweet.getUser().getScreenName(), new JsonHttpResponseHandler() {
+
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONArray jsonArray) {
+                            d("DEBUG", jsonArray.toString());
+                            try {
+                                if (jsonArray.get(0) != null) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                                    d("DEBUG", jsonObject.toString());
+
+                                    String userProfileBannerUrl = null;
+                                    String userProfileBackgroundImageUrl = null;
+                                    String userProfileImageUrl = null;
+                                    String userPreferredName = null;
+                                    String userScreenName = null;
+                                    String userDescription = null;
+                                    int userFollowerCount = 0;
+                                    int userFollowingCount = 0;
+                                    try {
+                                        userProfileBannerUrl = jsonObject.getString("profile_banner_url");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        try {
+                                            userProfileBannerUrl = jsonObject.getString("profile_background_image_url");
+                                        } catch (JSONException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                    }
+                                    try {
+                                        userProfileBackgroundImageUrl = jsonObject.getString("profile_background_image_url");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        try {
+                                            userProfileBackgroundImageUrl = jsonObject.getString("profile_banner_url");
+                                        } catch (JSONException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                    }
+                                    try {
+                                        userProfileImageUrl = jsonObject.getString("profile_image_url");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        userPreferredName = jsonObject.getString("name");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        userScreenName = jsonObject.getString("screen_name");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        userDescription = jsonObject.getString("description");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        userFollowerCount = jsonObject.getInt("followers_count");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    try {
+                                        userFollowingCount = jsonObject.getInt("following");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    intent.putExtra("userProfileBannerUrl", userProfileBannerUrl);
+                                    intent.putExtra("userProfileBackgroundImageUrl", userProfileBackgroundImageUrl);
+                                    intent.putExtra("userProfileImageUrl", userProfileImageUrl);
+                                    intent.putExtra("userPreferredName", userPreferredName);
+                                    intent.putExtra("userScreenName", userScreenName);
+                                    intent.putExtra("userFollowerCount", userFollowerCount);
+                                    intent.putExtra("userFollowingCount", userFollowingCount);
+                                    intent.putExtra("userDescription", userDescription);
+
+                                    getContext().startActivity(intent);
+
                                 }
-                                try {userProfileBackgroundImageUrl =  jsonObject.getString("profile_background_image_url"); }catch (JSONException e) {
-                                    e.printStackTrace();
-                                    try {userProfileBackgroundImageUrl =  jsonObject.getString("profile_banner_url"); }catch (JSONException e1) {e1.printStackTrace();}
-                                }
-                                try {userProfileImageUrl = jsonObject.getString("profile_image_url"); }catch (JSONException e) {e.printStackTrace();}
-                                try {userPreferredName = jsonObject.getString("name"); }catch (JSONException e) {e.printStackTrace();}
-                                try {userScreenName =jsonObject.getString("screen_name"); }catch (JSONException e) {e.printStackTrace();}
-                                try {userDescription =jsonObject.getString("description"); }catch (JSONException e) {e.printStackTrace();}
-                                try {userFollowerCount =  jsonObject.getInt("followers_count"); }catch (JSONException e) {e.printStackTrace();}
-                                try {userFollowingCount =jsonObject.getInt("following"); }catch (JSONException e) {e.printStackTrace();}
-
-                                intent.putExtra("userProfileBannerUrl", userProfileBannerUrl);
-                                intent.putExtra("userProfileBackgroundImageUrl", userProfileBackgroundImageUrl);
-                                intent.putExtra("userProfileImageUrl", userProfileImageUrl);
-                                intent.putExtra("userPreferredName", userPreferredName);
-                                intent.putExtra("userScreenName", userScreenName);
-                                intent.putExtra("userFollowerCount", userFollowerCount);
-                                intent.putExtra("userFollowingCount", userFollowingCount);
-                                intent.putExtra("userDescription",userDescription);
-
-                                getContext().startActivity(intent);
-
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+
                         }
 
-                    }
-
-                    //failure
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                        super.onFailure(statusCode, headers, throwable, errorResponse);
-                        Log.d("DEBUG",errorResponse.toString());
-                    }
-                });
-
-
-                d("DEBUG","view.toString()="+view.toString());
+                        //failure
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                            super.onFailure(statusCode, headers, throwable, errorResponse);
+                            d("DEBUG", errorResponse.toString());
+                        }
+                    });
+                }
+            });
 
 
+            vh.tvPreferredName.setText(tweet.getUser().getName());
+            vh.tvScreenName.setText("@" + tweet.getUser().getScreenName());
+            vh.tvRelativeTimeAgo.setText(tweet.getRelativeTimeAgo());
+            vh.tvRelativeTimeAgo.setTextColor(Color.GRAY);
+            vh.tvTweetBody.setText(tweet.getBody());
 
-            }
-        });
-
-
-        viewHolder.tvPreferredName = (TextView) convertView.findViewById(R.id.preferred_name);
-        viewHolder.tvPreferredName.setText(tweet.getUser().getName());
-
-        viewHolder.tvScreenName = (TextView) convertView.findViewById(R.id.screen_name);
-        viewHolder.tvScreenName.setText("@"+tweet.getUser().getScreenName());
-
-        viewHolder.tvRelativeTimeAgo = (TextView) convertView.findViewById(R.id.relative_time_ago);
-        viewHolder.tvRelativeTimeAgo.setText(tweet.getRelativeTimeAgo());
-
-        if(tweet.getRelativeTimeAgo().contains("seconds ago")){
-            viewHolder.tvRelativeTimeAgo.setTextColor(Color.RED);
+        } else if(viewHolder instanceof ProgressViewHolder){
+            ProgressViewHolder vh = (ProgressViewHolder) viewHolder;
+            vh.loadingPanel.setVisibility(View.VISIBLE);
         }
-        else if(tweet.getRelativeTimeAgo().equalsIgnoreCase("1 minute ago")) {
-            viewHolder.tvRelativeTimeAgo.setTextColor(Color.GREEN);
-        }else{
-            viewHolder.tvRelativeTimeAgo.setTextColor(Color.DKGRAY);
-        }
-
-        viewHolder.tvTweetBody = (TextView) convertView.findViewById(R.id.tweet_body);
-        viewHolder.tvTweetBody.setText(tweet.getBody());
-
-
-        viewHolder.ivTweetImage1 = (ImageView) convertView.findViewById(R.id.tweet_image1);
-        viewHolder.ivTweetImage1.setImageResource(0);
-        viewHolder.ivTweetImage2 = (ImageView) convertView.findViewById(R.id.tweet_image2);
-        viewHolder.ivTweetImage2.setImageResource(0);
-
-        if(viewHolder.ivTweetImages == null) {
-            viewHolder.ivTweetImages =  new ArrayList<>();
-            viewHolder.ivTweetImages.add(viewHolder.ivTweetImage1);
-            viewHolder.ivTweetImages.add(viewHolder.ivTweetImage2);
-        }
-
-
-        if(tweet.getExtendedEntities() != null){
-            d("DEBUG","viewHolder.ivTweetImages.size()="+viewHolder.ivTweetImages.size());
-            d("DEBUG","tweet.getExtendedEntities().getMedia().size())="+tweet.getExtendedEntities().getMedia().size());
-            for(int i=0 ; i < tweet.getExtendedEntities().getMedia().size() ; i++){
-                if(i >=  viewHolder.ivTweetImages.size()) break;
-                String tweetImage1Url = tweet.getExtendedEntities().getMedia().get(i).getMediaUrl();
-                int medium_w = tweet.getExtendedEntities().getMedia().get(i).getMedium_w();
-                int medium_h = tweet.getExtendedEntities().getMedia().get(i).getMedium_h();
-                ImageView tweetImageView = viewHolder.ivTweetImages.get(i);
-                Glide.with(getContext()).load(tweetImage1Url).into(tweetImageView);
-            }
-        }
-//        viewHolder.ivTweetImage1 = (ImageView) convertView.findViewById(R.id.tweet_image1);
-//        if(tweet.getTweetImage1Url()!=null){
-//            Log.d("DEBUG",tweet.getTweetImage1Url());
-//            String tweetImage1Url = tweet.getUser().getProfileImageUrl();
-//            Glide.with(getContext()).load(tweetImage1Url).fitCenter().centerCrop().into(viewHolder.ivTweetImage1);
-//        }
-
-
-//        //TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-//        tvTitle.setText(article.getHeadLine());
-//
-//        if(article.getNytMultimedia() != null) {
-//            String thumbnail = article.getNytMultimedia().getUrl();
-//            Glide.with(getContext()).load(thumbnail).into(imageView);
-//        }
-
-        return convertView;
     }
 
+
+    // Returns the total count of items in the list
+    @Override
+    public int getItemCount() {
+        d("DEBUG", "TweetsArrayAdapter getItemCount = " +tweetsList.size());
+        return tweetsList.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return tweetsList.get(position) != null ? VIEW_GENERAL_TWEET : VIEW_PROGRESS;
+    }
 
 }

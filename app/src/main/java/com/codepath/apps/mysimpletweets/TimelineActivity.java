@@ -152,7 +152,7 @@ public class TimelineActivity extends AppCompatActivity implements  ComposeDialo
                     TimelineActivity.this.userScreenName =jsonObject.getString("name");
                     TimelineActivity.this.userDescription =jsonObject.getString("description");
                     TimelineActivity.this.userFollowerCount = jsonObject.getInt("followers_count");
-                    TimelineActivity.this.userFollowingCount = jsonObject.getInt("following");
+                    //TimelineActivity.this.userFollowingCount = jsonObject.getInt("following");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

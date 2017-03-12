@@ -3,12 +3,15 @@ package com.codepath.apps.mysimpletweets.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import com.codepath.apps.mysimpletweets.R;
 import com.codepath.apps.mysimpletweets.adapters.TweetsArrayAdapter;
@@ -33,12 +36,18 @@ public abstract class TweetsListFragment extends Fragment {
     private int mPage;
 
     protected long oldestTweetId=1;
-    protected int perRequestTweetCount = 20;
+    protected int perRequestTweetCount = 5;
 
     protected ArrayList<Tweet> tweets;
     protected TweetsArrayAdapter tweetsAdapter;
-    protected ListView lvTweets;
+
+
+    //RecyclerView
+    protected RecyclerView rvTweetsList;
+    protected AbstractEndlessScrollListener endlessScrollListener;
     protected ImageView ivRateLimit;
+    protected TextView tvRateLimitText;
+
 
     protected class DefaultJsonHttpResponseHandler extends JsonHttpResponseHandler{
 
@@ -63,8 +72,11 @@ public abstract class TweetsListFragment extends Fragment {
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject
             errorResponse) {
                 Log.d("DEBUG",errorResponse.toString());
-                getLvTweets().setVisibility(View.INVISIBLE);
+                getRvTweetsView().setVisibility(View.INVISIBLE);
                 getIvRateLimit().setVisibility(View.VISIBLE);
+                getTvRateLimitText().setVisibility(View.VISIBLE);
+                getTvRateLimitText().setText("Oops! Rate Limit Reached.");
+
             }
 
     }
@@ -75,7 +87,8 @@ public abstract class TweetsListFragment extends Fragment {
         Log.d("DEBUG", "onCreate");
         tweets = new ArrayList<>();
         tweetsAdapter = new TweetsArrayAdapter(getActivity(),tweets);
-        populateTimeline(perRequestTweetCount,1L,1L);
+        Log.d("DEBUG", "TweetListFragement tweets = " +tweets);
+
     }
 
     @Nullable
@@ -84,34 +97,49 @@ public abstract class TweetsListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_tweets_list, container, false);
 
         Log.d("DEBUG", "onCreateView");
-        lvTweets = (ListView) v.findViewById(R.id.tweetListView);
-        lvTweets.setAdapter(tweetsAdapter);
+        Log.d("DEBUG", "tweetsAdapter="+tweetsAdapter);
+        rvTweetsList = (RecyclerView) v.findViewById(R.id.rvTweetsList);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext().getApplicationContext());
+        rvTweetsList.setAdapter(tweetsAdapter);
+        rvTweetsList.setLayoutManager(layoutManager);
         // Attach the listener to the AdapterView onCreate
-        lvTweets.setOnScrollListener(new AbstractEndlessScrollListener() {
+        rvTweetsList.addOnScrollListener(new AbstractEndlessScrollListener(layoutManager) {
             @Override
-            public boolean onLoadMore(int page, int totalItemsCount) {
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView recyclerView) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to your AdapterView
-                loadNextDataFromApi(page);
                 Log.d("DEBUG","onLoadMore:page"+ page);
                 Log.d("DEBUG","onLoadMore:totalItemsCount"+ totalItemsCount);
-                // or loadNextDataFromApi(totalItemsCount);
-                return true; // ONLY if more data is actually being loaded; false otherwise.
+                loadNextDataFromApi(page);
             }
         });
+
+        rvTweetsList.setItemAnimator(new DefaultItemAnimator());
 
         ivRateLimit = (ImageView) v.findViewById(R.id.rateLimit);
         ivRateLimit.setVisibility(View.INVISIBLE);
 
+        tvRateLimitText = (TextView) v.findViewById(R.id.rateLimitText);
+        tvRateLimitText.setVisibility(View.INVISIBLE);
+
+        populateTimeline(perRequestTweetCount,1L,1L);
         return v;
     }
 
     public void addAll(List<Tweet> tweets){
-        tweetsAdapter.addAll(tweets);
+        Log.d("DEBUG", "tweets.size()="+tweets.size());
+        this.tweets.addAll(tweets);
+        tweetsAdapter.notifyDataSetChanged();
     }
 
     public void clear(){
-        tweetsAdapter.clear();
+
+        // 1. First, clear the array of data
+        tweets.clear();
+        // 2. Notify the adapter of the update
+        tweetsAdapter.notifyDataSetChanged(); // or notifyItemRangeRemoved
+        // 3. Reset endless scroll listener when performing a new search
+        endlessScrollListener.resetState();
     }
 
     // Append the next page of data into the adapter
@@ -143,8 +171,8 @@ public abstract class TweetsListFragment extends Fragment {
         return tweetsAdapter;
     }
 
-    public ListView getLvTweets() {
-        return lvTweets;
+    public RecyclerView getRvTweetsView() {
+        return rvTweetsList;
     }
 
     public ImageView getIvRateLimit() {
@@ -161,5 +189,9 @@ public abstract class TweetsListFragment extends Fragment {
 
     public  void setOldestTweetId(long oldestTweetId) {
         this.oldestTweetId = oldestTweetId;
+    }
+
+    public TextView getTvRateLimitText() {
+        return tvRateLimitText;
     }
 }
